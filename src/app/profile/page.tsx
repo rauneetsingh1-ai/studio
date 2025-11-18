@@ -16,9 +16,8 @@ import { generateProfileBio } from '@/ai/flows/generate-profile-bio';
 import { suggestSkillsFromDescription } from '@/ai/flows/suggest-skills-from-description';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import { updateDocumentNonBlocking } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { doc, serverTimestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const profileSchema = z.object({
@@ -70,20 +69,21 @@ function ProfileForm({ userProfile, userDocRef }: { userProfile: any, userDocRef
         ...data,
         skills: data.skills?.split(',').map(s => s.trim()).filter(Boolean) || [],
         interests: data.interests?.split(',').map(s => s.trim()).filter(Boolean) || [],
+        updatedAt: serverTimestamp(),
     }
     updateDocumentNonBlocking(userDocRef, updatedData);
     toast({
         title: "Profile Saved!",
         description: "Your profile has been successfully updated.",
     });
-    reset(data); // Resets dirty state
+    // Form is reset after Firestore listener updates the userProfile prop
   };
 
   const handleGenerateBio = async () => {
     setIsBioLoading(true);
     try {
         const { skills, interests } = getValues();
-        if (!skills || !interests) {
+        if (!skills && !interests) {
             toast({
                 title: "Missing Information",
                 description: "Please fill out your skills and interests to generate a bio.",
@@ -91,7 +91,10 @@ function ProfileForm({ userProfile, userDocRef }: { userProfile: any, userDocRef
             });
             return;
         }
-        const result = await generateProfileBio({ skills, interests });
+        const result = await generateProfileBio({ 
+            skills: skills || '', 
+            interests: interests || '' 
+        });
         setValue('bio', result.bio, { shouldDirty: true });
     } catch (error) {
         console.error("Failed to generate bio:", error);
@@ -311,3 +314,5 @@ export default function ProfilePage() {
         </AppLayout>
     );
 }
+
+    

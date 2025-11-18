@@ -55,6 +55,11 @@
           "description": "Timestamp of when the user profile was created.",
           "format": "date-time"
         },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of when the user profile was last updated.",
+          "format": "date-time"
+        },
         "interests": {
           "type": "array",
           "description": "User's interests.",
@@ -264,3 +269,4 @@
     "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and support secure list operations (QAPs). User profiles are stored under `/users/{userId}` for private data with path-based ownership. Matches are stored under `/users/{userId}/matches/{matchId}` since a user has many matches, inheriting the ownership from the user. This eliminates the need for `get()` calls in security rules. ChatRooms between users are placed in a top-level `/chatRooms/{chatRoomId}` collection, with denormalized `members` map to grant access to users, this enforces authorization independence and avoids complex rule logic. ChatMessages are nested under `/chatRooms/{chatRoomId}/messages/{messageId}`, inheriting authorization from the parent ChatRoom. This design prioritizes clarity, scalability, and robust security."
   }
 }
+    
