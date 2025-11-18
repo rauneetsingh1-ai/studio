@@ -71,7 +71,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {teammates.slice(0, 3).map((user) => (
-                    <TeammateCard key={user.id} user={user} currentUser={currentUser} />
+                    <TeammateCard key={user.id} user={user} />
                 ))}
             </div>
         </div>

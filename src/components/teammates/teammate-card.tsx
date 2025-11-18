@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '../ui/progress';
 import { MessageSquarePlus, UserRoundCheck, Check, Loader } from 'lucide-react';
 import { CompatibilityDialog } from './compatibility-dialog';
-import { useFirebase, addDocumentNonBlocking, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, serverTimestamp, query, where, limit } from 'firebase/firestore';
+import { useFirebase, addDocumentNonBlocking, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, serverTimestamp, query, where, limit, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
@@ -17,20 +17,27 @@ interface TeammateCardProps {
   user: UserProfile & { matchScore: number };
 }
 
-export default function TeammateCard({ user }: TeammateCardProps) {
+export default function TeammateCard({ user: potentialTeammate }: TeammateCardProps) {
   const { firestore, user: currentUser } = useFirebase();
   const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
+
+  const currentUserDocRef = useMemoFirebase(() => {
+    if (!firestore || !currentUser) return null;
+    return doc(firestore, 'users', currentUser.uid);
+  }, [firestore, currentUser]);
+
+  const {data: currentUserProfile} = useDoc(currentUserDocRef);
 
   const requestsRef = useMemoFirebase(() => {
     if (!firestore || !currentUser) return null;
     return query(
         collection(firestore, "requests"),
         where('fromUid', '==', currentUser.uid),
-        where('toUid', '==', user.id),
+        where('toUid', '==', potentialTeammate.id),
         limit(1)
     );
-  }, [firestore, currentUser, user.id]);
+  }, [firestore, currentUser, potentialTeammate.id]);
 
   const { data: existingRequests, isLoading: isLoadingRequests } = useCollection(requestsRef);
 
@@ -54,7 +61,7 @@ export default function TeammateCard({ user }: TeammateCardProps) {
 
     addDocumentNonBlocking(requestsCollection, {
       fromUid: currentUser.uid,
-      toUid: user.id,
+      toUid: potentialTeammate.id,
       status: "pending",
       createdAt: serverTimestamp()
     });
@@ -62,7 +69,7 @@ export default function TeammateCard({ user }: TeammateCardProps) {
     // The toast and state update can happen immediately due to the non-blocking write
     toast({
         title: "Request Sent!",
-        description: `Your connection request to ${user.name} has been sent.`,
+        description: `Your connection request to ${potentialTeammate.name} has been sent.`,
     });
     
     // Visually disable the button immediately; Firestore listener will eventually confirm.
@@ -73,25 +80,25 @@ export default function TeammateCard({ user }: TeammateCardProps) {
     <Card className="flex flex-col">
       <CardHeader className="items-center text-center">
         <Avatar className="h-24 w-24 mb-2">
-          <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="person face" />
-          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+          <AvatarImage src={potentialTeammate.avatarUrl} alt={potentialTeammate.name} data-ai-hint="person face" />
+          <AvatarFallback>{potentialTeammate.name.charAt(0)}</AvatarFallback>
         </Avatar>
-        <CardTitle>{user.name}</CardTitle>
-        <CardDescription className="line-clamp-2 h-10">{user.bio}</CardDescription>
+        <CardTitle>{potentialTeammate.name}</CardTitle>
+        <CardDescription className="line-clamp-2 h-10">{potentialTeammate.bio}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 space-y-4">
         <div>
             <div className="flex justify-between items-center mb-1">
                  <h4 className="text-sm font-semibold">Match Score</h4>
-                 <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-secondary to-primary">{user.matchScore}%</span>
+                 <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-secondary to-primary">{potentialTeammate.matchScore}%</span>
             </div>
-            <Progress value={user.matchScore} aria-label={`${user.matchScore}% match score`} />
-             <CompatibilityDialog user1={currentUser!} user2={user} />
+            <Progress value={potentialTeammate.matchScore} aria-label={`${potentialTeammate.matchScore}% match score`} />
+             {currentUserProfile && <CompatibilityDialog user1={currentUserProfile} user2={potentialTeammate} />}
         </div>
         <div>
           <h4 className="text-sm font-semibold mb-2">Top Skills</h4>
           <div className="flex flex-wrap gap-1">
-            {user.skills.slice(0, 4).map((skill) => (
+            {potentialTeammate.skills.slice(0, 4).map((skill) => (
               <Badge key={skill} variant="secondary">
                 {skill}
               </Badge>

@@ -4,10 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader, Plus, Swords } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader, Plus, Swords } from 'lucide-react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase, updateDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
-import { collection, doc, query, where } from 'firebase/firestore';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { collection, doc, query, where, DocumentData } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -80,48 +79,49 @@ function CreateTaskDialog({ projectId, columnId, onTaskCreated }) {
     );
 }
 
-function KanbanTask({ task, index }) {
-     return (
-        <Draggable draggableId={task.id} index={index}>
-            {(provided, snapshot) => (
-                <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className={`bg-card p-3 rounded-lg border mb-2 ${snapshot.isDragging ? 'shadow-lg' : ''}`}
-                >
-                    <h4 className="font-semibold text-sm">{task.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{task.description}</p>
-                    {task.assignedTo && (
-                         <Avatar className="h-6 w-6 mt-2">
-                            <AvatarImage src={`https://picsum.photos/seed/${task.assignedTo}/100`} />
-                            <AvatarFallback>{task.assignedTo.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                    )}
+function KanbanTask({ task, onMove, canMoveLeft, canMoveRight }) {
+    const { firestore, user } = useFirebase();
+
+    return (
+        <div className="bg-card p-3 rounded-lg border mb-2 space-y-2">
+            <h4 className="font-semibold text-sm">{task.title}</h4>
+            {task.description && <p className="text-xs text-muted-foreground mt-1">{task.description}</p>}
+            
+            <div className="flex items-center justify-between">
+                {task.assignedTo ? (
+                    <Avatar className="h-6 w-6 mt-2">
+                        <AvatarImage src={`https://picsum.photos/seed/${task.assignedTo}/100`} />
+                        <AvatarFallback>{task.assignedTo.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                ) : <div />}
+                <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onMove('left')} disabled={!canMoveLeft}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onMove('right')} disabled={!canMoveRight}>
+                        <ArrowRight className="h-4 w-4" />
+                    </Button>
                 </div>
-            )}
-        </Draggable>
+            </div>
+        </div>
     );
 }
 
-function KanbanColumn({ column, tasks, projectId }) {
+function KanbanColumn({ column, tasks, projectId, onMoveTask, canMoveLeft, canMoveRight }) {
     return (
-        <div className="bg-muted/50 rounded-lg w-72 flex-shrink-0">
+        <div className="bg-muted/50 rounded-lg w-72 flex-shrink-0 flex flex-col">
             <h3 className="font-semibold p-3 border-b">{column.title}</h3>
-            <Droppable droppableId={column.id}>
-                {(provided, snapshot) => (
-                    <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`p-2 min-h-[200px] transition-colors ${snapshot.isDraggingOver ? 'bg-accent/20' : ''}`}
-                    >
-                        {tasks.map((task, index) => (
-                            <KanbanTask key={task.id} task={task} index={index} />
-                        ))}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
+            <div className="p-2 min-h-[200px] flex-1 overflow-y-auto">
+                {tasks.map((task) => (
+                    <KanbanTask 
+                        key={task.id} 
+                        task={task} 
+                        onMove={(direction) => onMoveTask(task.id, direction)}
+                        canMoveLeft={canMoveLeft}
+                        canMoveRight={canMoveRight}
+                    />
+                ))}
+            </div>
             <div className="p-2 border-t">
                 <CreateTaskDialog projectId={projectId} columnId={column.id} onTaskCreated={() => {}}/>
             </div>
@@ -129,21 +129,28 @@ function KanbanColumn({ column, tasks, projectId }) {
     );
 }
 
-function KanbanBoard({ project, tasks, onDragEnd }) {
-     const orderedColumns = project.columns.sort((a, b) => a.order - b.order);
+function KanbanBoard({ project, tasks, onMoveTask }) {
+    const orderedColumns = project.columns.sort((a, b) => a.order - b.order);
 
     return (
-        <DragDropContext onDragEnd={onDragEnd}>
-            <div className="flex gap-4 overflow-x-auto p-4">
-                {orderedColumns.map(column => {
-                    const columnTasks = tasks.filter(task => task.status === column.id);
-                    return <KanbanColumn key={column.id} column={column} tasks={columnTasks} projectId={project.id}/>;
-                })}
-            </div>
-        </DragDropContext>
+        <div className="flex gap-4 overflow-x-auto p-4 flex-1">
+            {orderedColumns.map((column, index) => {
+                const columnTasks = tasks.filter(task => task.status === column.id);
+                return (
+                    <KanbanColumn 
+                        key={column.id} 
+                        column={column} 
+                        tasks={columnTasks} 
+                        projectId={project.id}
+                        onMoveTask={onMoveTask}
+                        canMoveLeft={index > 0}
+                        canMoveRight={index < orderedColumns.length - 1}
+                    />
+                );
+            })}
+        </div>
     );
 }
-
 
 export default function TeamPage() {
     const { user, firestore } = useFirebase();
@@ -151,9 +158,11 @@ export default function TeamPage() {
     // 1. Find the user's team
     const teamQuery = useMemoFirebase(() => {
         if (!user) return null;
+        // This is a simplification and assumes the user is in one team.
+        // A more robust solution might involve storing the user's team ID on their user profile.
         return query(
             collection(firestore, 'teams'),
-            where('members', 'array-contains', { uid: user.uid, role: 'member' }) // This is a simplification
+            where('members', 'array-contains', { uid: user.uid, role: 'member' }) 
         );
     }, [user, firestore]);
     const { data: teams, isLoading: isLoadingTeams } = useCollection(teamQuery);
@@ -174,20 +183,26 @@ export default function TeamPage() {
     }, [project]);
     const { data: tasks, isLoading: isLoadingTasks } = useCollection(tasksQuery);
 
-    const handleDragEnd = (result: DropResult) => {
-        const { destination, source, draggableId } = result;
+    const handleMoveTask = (taskId: string, direction: 'left' | 'right') => {
+        if (!project || !tasks || !firestore) return;
 
-        if (!destination || !project || !firestore) {
-            return;
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        const orderedColumns = project.columns.sort((a, b) => a.order - b.order);
+        const currentColumnIndex = orderedColumns.findIndex(c => c.id === task.status);
+
+        if (currentColumnIndex === -1) return;
+
+        const nextColumnIndex = direction === 'right' ? currentColumnIndex + 1 : currentColumnIndex - 1;
+        
+        if (nextColumnIndex >= 0 && nextColumnIndex < orderedColumns.length) {
+            const nextColumn = orderedColumns[nextColumnIndex];
+            const taskRef = doc(firestore, `projects/${project.id}/tasks`, taskId);
+            updateDocumentNonBlocking(taskRef, { status: nextColumn.id });
         }
-
-        if (destination.droppableId === source.droppableId && destination.index === source.index) {
-            return;
-        }
-
-        const taskRef = doc(firestore, `projects/${project.id}/tasks`, draggableId);
-        updateDocumentNonBlocking(taskRef, { status: destination.droppableId });
     };
+
 
     if (isLoadingTeams || isLoadingProjects) {
         return (
@@ -236,11 +251,9 @@ export default function TeamPage() {
                 <Loader className="animate-spin h-8 w-8 text-primary" />
             </div>
         ) : (
-             <KanbanBoard project={project} tasks={tasks || []} onDragEnd={handleDragEnd} />
+             <KanbanBoard project={project} tasks={tasks || []} onMoveTask={handleMoveTask} />
         )}
       </main>
     </AppLayout>
   );
 }
-
-    

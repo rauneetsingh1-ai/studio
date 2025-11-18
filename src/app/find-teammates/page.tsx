@@ -4,11 +4,21 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Input } from '@/components/ui/input';
 import TeammateCard from '@/components/teammates/teammate-card';
 import { teammates } from '@/lib/data';
-import { Search } from 'lucide-react';
-import { useFirebase } from '@/firebase';
+import { Loader, Search } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 export default function FindTeammatesPage() {
-  const { user } = useFirebase();
+  const { user, isUserLoading } = useUser();
+
+  if (isUserLoading) {
+    return (
+        <AppLayout>
+            <main className="flex-1 p-4 md:p-8 flex items-center justify-center">
+                <Loader className="animate-spin h-8 w-8 text-primary" />
+            </main>
+        </AppLayout>
+    )
+  }
 
   // Filter out the current user from the list of teammates
   const potentialTeammates = teammates.filter(t => t.id !== user?.uid);

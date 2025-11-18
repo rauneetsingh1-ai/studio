@@ -28,25 +28,27 @@ export function CompatibilityDialog({ user1, user2 }: CompatibilityDialogProps) 
 
   const handleOpen = async () => {
     if (summary) return; // Don't re-fetch if we already have the summary
-
-    setIsLoading(true);
-    try {
-      const result = await analyzeTeamCompatibility({
-        user1Profile: JSON.stringify(user1),
-        user2Profile: JSON.stringify(user2),
-        matchScore: user2.matchScore,
-      });
-      setSummary(result.summary);
-    } catch (error) {
-      console.error('Failed to analyze compatibility:', error);
-      toast({
-        title: 'Analysis Failed',
-        description: 'Could not generate compatibility analysis. Please try again.',
-        variant: 'destructive',
-      });
-      setIsOpen(false); // Close dialog on error
-    } finally {
-      setIsLoading(false);
+    if (!isOpen) { // Only fetch when opening for the first time
+      setIsOpen(true);
+      setIsLoading(true);
+      try {
+        const result = await analyzeTeamCompatibility({
+          user1Profile: JSON.stringify(user1),
+          user2Profile: JSON.stringify(user2),
+          matchScore: user2.matchScore,
+        });
+        setSummary(result.summary);
+      } catch (error) {
+        console.error('Failed to analyze compatibility:', error);
+        toast({
+          title: 'Analysis Failed',
+          description: 'Could not generate compatibility analysis. Please try again.',
+          variant: 'destructive',
+        });
+        setIsOpen(false); // Close dialog on error
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
