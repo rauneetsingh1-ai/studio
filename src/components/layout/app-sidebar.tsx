@@ -31,6 +31,7 @@ import {
 import Logo from '../logo';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
+import { ThemeToggle } from '../theme-toggle';
 
 const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -112,9 +113,12 @@ export function AppSidebar() {
                 <AvatarImage src={user?.photoURL ?? undefined} alt={user?.displayName ?? ''} data-ai-hint="person face" />
                 <AvatarFallback>{user?.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+            <div className="flex flex-col flex-1 group-data-[collapsible=icon]:hidden">
                 <span className="text-sm font-semibold">{user?.displayName}</span>
                 <span className="text-xs text-muted-foreground">Pro Member</span>
+            </div>
+            <div className="group-data-[collapsible=icon]:hidden">
+                 <ThemeToggle />
             </div>
         </div>
       </SidebarFooter>

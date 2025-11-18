@@ -8,7 +8,7 @@ body {
 
 @layer base {
   :root {
-    --background: 240 5% 96%; /* #F0F0F0 - Light Gray */
+    --background: 0 0% 100%; /* White */
     --foreground: 240 6% 10%;
 
     --card: 0 0% 100%;
@@ -20,13 +20,13 @@ body {
     --primary: 271 44% 76%; /* #B19CD9 - Soft Violet */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 33 100% 64%; /* #FFB347 - Soft Orange */
+    --secondary: 45 100% 60%; /* Yellow */
     --secondary-foreground: 240 6% 10%;
     
-    --muted: 240 5% 90%;
+    --muted: 240 5% 96%;
     --muted-foreground: 240 4% 46%;
 
-    --accent: 240 5% 90%;
+    --accent: 240 5% 96%;
     --accent-foreground: 240 6% 10%;
 
     --destructive: 0 84.2% 60.2%;
@@ -39,30 +39,30 @@ body {
     --radius: 0.5rem;
 
     /* Sidebar specific colors */
-    --sidebar-background: 240 5% 96%;
+    --sidebar-background: 240 5% 98%;
     --sidebar-foreground: 240 6% 10%;
     --sidebar-primary: 271 44% 76%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 240 5% 90%;
+    --sidebar-accent: 240 5% 92%;
     --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 240 6% 85%;
     --sidebar-ring: 271 44% 76%;
   }
 
   .dark {
-    --background: 240 6% 10%;
+    --background: 0 0% 0%; /* Black */
     --foreground: 0 0% 98%;
 
-    --card: 240 4% 16%;
+    --card: 240 4% 12%;
     --card-foreground: 0 0% 98%;
 
     --popover: 240 6% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 271 44% 76%;
+    --primary: 271 44% 76%; /* Soft Violet */
     --primary-foreground: 240 6% 10%;
 
-    --secondary: 33 100% 64%;
+    --secondary: 45 100% 60%;
     --secondary-foreground: 240 6% 10%;
 
     --muted: 240 4% 16%;
@@ -79,7 +79,7 @@ body {
     --ring: 271 44% 76%;
     
     /* Sidebar specific colors for dark mode */
-    --sidebar-background: 240 6% 10%;
+    --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 271 44% 76%;
     --sidebar-primary-foreground: 240 6% 10%;
