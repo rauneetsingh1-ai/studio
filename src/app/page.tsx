@@ -20,7 +20,7 @@ export default function LandingPage() {
           <Button variant="ghost" asChild>
             <Link href="/login">Login</Link>
           </Button>
-          <Button variant="secondary" asChild>
+          <Button asChild>
             <Link href="/signup">Get Started</Link>
           </Button>
         </nav>
@@ -56,7 +56,7 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
                   Key Features
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">
@@ -72,8 +72,8 @@ export default function LandingPage() {
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 pt-12">
               <div className="grid gap-1">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent/10 rounded-md">
-                        <BrainCircuit className="w-6 h-6 text-accent" />
+                    <div className="p-2 bg-primary/10 rounded-md">
+                        <BrainCircuit className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">AI-Powered Matching</h3>
                 </div>
@@ -83,8 +83,8 @@ export default function LandingPage() {
               </div>
               <div className="grid gap-1">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent/10 rounded-md">
-                        <UsersRound className="w-6 h-6 text-accent" />
+                    <div className="p-2 bg-primary/10 rounded-md">
+                        <UsersRound className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">Detailed User Profiles</h3>
                 </div>
@@ -94,8 +94,8 @@ export default function LandingPage() {
               </div>
               <div className="grid gap-1">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent/10 rounded-md">
-                        <MessagesSquare className="w-6 h-6 text-accent" />
+                    <div className="p-2 bg-primary/10 rounded-md">
+                        <MessagesSquare className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">Real-time Chat Rooms</h3>
                 </div>
@@ -105,8 +105,8 @@ export default function LandingPage() {
               </div>
               <div className="grid gap-1">
                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent/10 rounded-md">
-                        <UsersRound className="w-6 h-6 text-accent" />
+                    <div className="p-2 bg-primary/10 rounded-md">
+                        <UsersRound className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold">Team Collaboration Tools</h3>
                 </div>

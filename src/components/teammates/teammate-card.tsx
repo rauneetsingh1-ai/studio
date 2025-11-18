@@ -29,7 +29,7 @@ export default function TeammateCard({ user, currentUser }: TeammateCardProps) {
         <div>
             <div className="flex justify-between items-center mb-1">
                  <h4 className="text-sm font-semibold">Match Score</h4>
-                 <span className="text-sm font-bold text-accent">{user.matchScore}%</span>
+                 <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-secondary to-primary">{user.matchScore}%</span>
             </div>
             <Progress value={user.matchScore} aria-label={`${user.matchScore}% match score`} />
              <CompatibilityDialog user1={currentUser} user2={user} />
