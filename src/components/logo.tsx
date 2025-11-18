@@ -1,10 +1,11 @@
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import LogoIcon from './logo-icon';
 
 export default function Logo({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <Image src="/logo.png" alt="CollabX Logo" width={140} height={32} />
+      <LogoIcon className="h-6 w-6 text-primary" />
+      <span className="font-bold text-lg text-foreground">CollabX</span>
     </div>
   );
 }
