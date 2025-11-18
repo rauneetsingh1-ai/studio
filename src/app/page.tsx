@@ -35,7 +35,7 @@ export default function LandingPage() {
                     Forge Your Dream Team for the Next Buildathon
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    CODECELEST uses AI to connect you with the perfect
+                    CollabX uses AI to connect you with the perfect
                     teammates based on skills, interests, and project goals.
                     Stop searching, start building.
                   </p>
@@ -124,7 +124,7 @@ export default function LandingPage() {
                 Ready to Build Something Amazing?
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Join CODECELEST today and find the collaborators who will help
+                Join CollabX today and find the collaborators who will help
                 you bring your vision to life.
               </p>
             </div>
@@ -138,7 +138,7 @@ export default function LandingPage() {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">
-          &copy; 2024 CODECELEST. All rights reserved.
+          &copy; 2024 CollabX. All rights reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link
