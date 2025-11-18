@@ -14,44 +14,57 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
   const pathname = usePathname();
-  const [isCreatingDoc, setIsCreatingDoc] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    if (isUserLoading || isCreatingDoc) return;
+    if (isUserLoading) {
+      // Still waiting for Firebase Auth to initialize
+      return;
+    }
 
     const isAuthRoute = AUTH_ROUTES.includes(pathname);
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
     if (user) {
-      // User is logged in
+      // User is authenticated
       const userDocRef = doc(firestore, 'users', user.uid);
       
-      setIsCreatingDoc(true);
       getDoc(userDocRef).then((docSnap) => {
         if (!docSnap.exists()) {
-          // Create user document if it doesn't exist
+          // If the user document doesn't exist, create it.
+          // This is a one-time operation for new sign-ups.
           console.log('User document does not exist, creating...');
           createUserDoc(firestore, user, { name: user.displayName });
         }
         
         if (isAuthRoute) {
-          // Redirect from auth pages to dashboard if logged in
+          // If logged in, redirect away from login/signup to the dashboard.
           router.replace('/dashboard');
+        } else {
+          // If on any other route, we're done processing.
+          setIsProcessing(false);
         }
-      }).finally(() => {
-          setIsCreatingDoc(false);
+      }).catch(error => {
+        console.error("Error checking/creating user document:", error);
+        // Even if there's an error, we should stop processing to avoid getting stuck.
+        setIsProcessing(false);
       });
 
     } else {
-      // User is not logged in
+      // User is not authenticated
       if (!isAuthRoute && !isPublicRoute) {
-        // Redirect to login if trying to access a protected page
+        // If trying to access a protected page, redirect to login.
         router.replace('/login');
+      } else {
+        // If on a public or auth route, we're done processing.
+        setIsProcessing(false);
       }
     }
-  }, [user, isUserLoading, pathname, router, firestore, isCreatingDoc]);
+    // The dependency array ensures this effect runs only when auth state changes.
+  }, [user, isUserLoading, pathname, router, firestore]);
 
-  if (isUserLoading || isCreatingDoc) {
+  if (isUserLoading || isProcessing) {
+    // Show a global loader while we verify auth and handle initial routing.
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader className="animate-spin h-8 w-8" />
