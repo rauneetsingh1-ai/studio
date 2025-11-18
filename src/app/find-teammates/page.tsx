@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Input } from '@/components/ui/input';
 import TeammateCard from '@/components/teammates/teammate-card';
 import { Loader, Search } from 'lucide-react';
-import { useFirebase, useUser, useCollection, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import type { UserProfile } from '@/lib/types';
 import { useMemo } from 'react';
