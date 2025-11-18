@@ -99,6 +99,23 @@ service cloud.firestore {
       allow update: if isSignedIn() && resource.data.toUid == request.auth.uid;
       allow delete: if isSignedIn() && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
     }
+    
+    /**
+     * @description Secure project Kanban boards.
+     * @path /projects/{projectId}
+     */
+    match /projects/{projectId} {
+      allow read, write: if isSignedIn() && isTeamMember(get(/databases/$(database)/documents/projects/$(projectId)).data.teamId);
+    }
+
+    /**
+     * @description Secure project tasks.
+     * @path /projects/{projectId}/tasks/{taskId}
+     */
+    match /projects/{projectId}/tasks/{taskId} {
+      allow read, write: if isSignedIn() && isTeamMember(get(/databases/$(database)/documents/projects/$(projectId)).data.teamId);
+    }
+
 
     // --- Helper Functions ---
 
@@ -156,6 +173,16 @@ service cloud.firestore {
     function isChatRoomParticipant(participants) {
         return isSignedIn() && request.auth.uid in participants;
     }
+
+    /**
+     * @description Checks if the authenticated user is a member of a given team.
+     * @param {string} teamId - The ID of the team to check.
+     * @return {boolean} True if the user is a member of the team, false otherwise.
+     */
+    function isTeamMember(teamId) {
+      return isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.members;
+    }
   }
 }
+
     
