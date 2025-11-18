@@ -46,7 +46,7 @@ function ChatSidebar({ chatRooms, activeChatId, setActiveChatId, isLoading }) {
           >
             <Avatar className="h-10 w-10">
               <AvatarImage src={`https://picsum.photos/seed/${room.id}/200`} />
-              <AvatarFallback>{room.name?.charAt(0) ?? 'C'}</AvatarFallback>
+              <AvatarFallback>{'C'}</AvatarFallback>
             </Avatar>
             <div className="flex-1 truncate">
               <p className="font-semibold">{room.name ?? 'Chat Room'}</p>
@@ -65,7 +65,7 @@ function MessageBubble({ message, isCurrentUser }) {
             {!isCurrentUser && (
                  <Avatar className="h-8 w-8">
                     <AvatarImage src={`https://picsum.photos/seed/${message.from}/200`} />
-                    <AvatarFallback>{message.from.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{message.from?.charAt(0) ?? '?'}</AvatarFallback>
                 </Avatar>
             )}
             <div className={cn(
@@ -73,7 +73,7 @@ function MessageBubble({ message, isCurrentUser }) {
                 isCurrentUser ? "bg-primary text-primary-foreground" : "bg-muted"
             )}>
                 <p className="text-sm">{message.text}</p>
-                 <p className="text-xs opacity-70 mt-1 text-right">{new Date(message.createdAt?.toDate()).toLocaleTimeString()}</p>
+                 <p className="text-xs opacity-70 mt-1 text-right">{message.createdAt?.toDate ? new Date(message.createdAt.toDate()).toLocaleTimeString() : 'sending...'}</p>
             </div>
         </div>
     )
@@ -151,8 +151,8 @@ function ChatView({ activeChatId }) {
 
 
 export default function MessagesPage() {
-  const { user, firestore } = useFirebase();
-  const [activeChatId, setActiveChatId] = useState(null);
+  const { user, firestore, isUserLoading } = useFirebase();
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   const chatRoomsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -164,7 +164,9 @@ export default function MessagesPage() {
 
   const { data: chatRooms, isLoading } = useCollection(chatRoomsQuery);
 
-  if (isLoading) {
+  const isPageLoading = isLoading || isUserLoading;
+
+  if (isPageLoading) {
     return (
          <AppLayout>
             <main className="flex-1">
@@ -214,4 +216,3 @@ export default function MessagesPage() {
     </AppLayout>
   );
 }
-    

@@ -29,13 +29,14 @@ import {
   Bell,
 } from 'lucide-react';
 import Logo from '../logo';
-import { useFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
 
 const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/find-teammates', label: 'Find Teammates', icon: UsersRound },
-  { href: '/notifications', label: 'Notifications', icon: Bell },
-  { href: '/messages', label: 'Messages', icon: MessageSquare, badge: '3' },
+  { href: '/notifications', label: 'Notifications', icon: Bell, notificationKey: 'requests' },
+  { href: '/messages', label: 'Messages', icon: MessageSquare },
   { href: '/team', label: 'My Team', icon: Swords },
 ];
 
@@ -47,7 +48,19 @@ const bottomMenuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user } = useFirebase();
+  const { user, firestore } = useFirebase();
+
+  const requestsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(
+        collection(firestore, "requests"),
+        where('toUid', '==', user.uid),
+        where('status', '==', 'pending')
+    );
+  }, [firestore, user]);
+
+  const { data: pendingRequests } = useCollection(requestsQuery);
+  const notificationCount = pendingRequests?.length || 0;
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -67,7 +80,7 @@ export function AppSidebar() {
                   <a>
                     <item.icon />
                     <span>{item.label}</span>
-                    {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
+                    {item.notificationKey === 'requests' && notificationCount > 0 && <SidebarMenuBadge>{notificationCount}</SidebarMenuBadge>}
                   </a>
                 </SidebarMenuButton>
               </Link>
