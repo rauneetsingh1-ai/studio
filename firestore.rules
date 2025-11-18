@@ -1,188 +1,34 @@
-/**
- * @file Firestore Security Rules for TeamUp Forge.
- *
- * @core_philosophy This ruleset enforces a strict user-ownership model for user profiles and their associated data (matches).
- *  Chat rooms implement a shared access model, where membership is explicitly managed.
- *  Data validation is minimized for prototyping speed, focusing on authorization.
- * @data_structure User profiles are stored under `/users/{userId}`, with matches nested under each user.
- *  Chat rooms are stored in a top-level `/chatRooms/{chatRoomId}` collection, with messages nested under each chat room.
- * @key_security_decisions User listing is disabled to protect user privacy. Read/write access to chat rooms and messages is restricted to members only.
- *  The default security posture for any ambiguous relationship is strict denial.
- * @denormalization The `ChatRoom` document contains a denormalized `participants` map (userId: true) to simplify authorization and avoid costly `get()` calls.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Secure user profiles with owner-only access.
-     * @path /users/{userId}
-     * @allow (create) - User 'abc' can create their own profile: `request.auth.uid == 'abc'` and `request.resource.data.id == 'abc'`.
-     * @allow (get, update, delete) - User 'abc' can read, update, or delete their profile if `request.auth.uid == 'abc'`.
-     * @deny (create) - User 'def' cannot create a profile for user 'abc': `request.auth.uid == 'def'` and `request.resource.data.id == 'abc'`.
-     * @deny (update, delete) - User 'def' cannot update or delete user 'abc's profile: `request.auth.uid == 'def'` when trying to modify `/users/abc`.
-     * @principle Enforces document ownership for writes.
-     */
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-
-      allow create: if isSignedIn() && isSelfCreate(userId);
-      allow update: if isExistingOwner(userId) && isImmutableOwner();
-      allow delete: if isExistingOwner(userId);
+    // users: read own doc fully, public limited read
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      // public reading disabled
+      allow create: if request.auth.uid == uid;
+      allow update: if request.auth.uid == uid;
     }
 
-    /**
-     * @description Secure user matches with owner-only access inherited from the parent user profile.
-     * @path /users/{userId}/matches/{matchId}
-     * @allow (create) - User 'abc' can create a match under their profile: `request.auth.uid == 'abc'`.
-     * @allow (get, update, delete) - User 'abc' can read, update, or delete a match under their profile if `request.auth.uid == 'abc'`.
-     * @deny (create) - User 'def' cannot create a match under user 'abc's profile: `request.auth.uid == 'def'` when trying to create under `/users/abc/matches`.
-     * @deny (update, delete) - User 'def' cannot update or delete a match under user 'abc's profile: `request.auth.uid == 'def'` when trying to modify `/users/abc/matches`.
-     * @principle Enforces document ownership for writes, inheriting ownership from the user profile.
-     */
-    match /users/{userId}/matches/{matchId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.user1Id == userId;
-      allow update: if isExistingOwner(userId) && resource.data.user1Id == userId;
-      allow delete: if isExistingOwner(userId);
+    match /teams/{teamId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && exists(/databases/$(database)/documents/teams/$(teamId)) && resource.data.createdBy == request.auth.uid;
+      // restrict membership modifications via Cloud Functions or validate members array
     }
 
-    /**
-     * @description Secure chat rooms with shared access based on the `participants` map.
-     * @path /chatRooms/{chatRoomId}
-     * @allow (get, list) - Any authenticated user can read or list chat rooms they are a participant of (if `request.auth.uid` is in the `participants` map).
-     * @allow (create) - Any authenticated user can create a chat room.
-     * @allow (update, delete) - Only participants listed in the `participants` map can update or delete the chat room.
-     * @deny (get, list) - User 'abc' cannot read or list chat rooms they are not a participant of (if 'abc' is not in the `participants` map).
-     * @principle Enforces shared access control based on explicit membership.
-     */
-    match /chatRooms/{chatRoomId} {
-      allow get: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
-      allow list: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
-
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
-      allow delete: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
+    match /requests/{reqId} {
+      allow create: if request.auth != null && request.resource.data.fromUid == request.auth.uid;
+      allow read: if request.auth != null && (resource.data.fromUid == request.auth.uid || (resource.data.toTeamId != null && get(/databases/$(database)/documents/teams/$(resource.data.toTeamId)).data.createdBy == request.auth.uid));
+      allow update: if request.auth != null && (resource.data.toTeamId != null && get(/databases/$(database)/documents/teams/$(resource.data.toTeamId)).data.createdBy == request.auth.uid);
     }
 
-    /**
-     * @description Secure chat messages with access inherited from the parent chat room.
-     * @path /chatRooms/{chatRoomId}/messages/{messageId}
-     * @allow (get, list) - Only participants of the chat room can read or list messages.
-     * @allow (create) - Only participants of the chat room can create messages.
-     * @allow (update, delete) - Only participants of the chat room can update or delete messages (typically only the author).
-     * @deny (get, list) - User 'abc' cannot read or list messages in a chat room they are not a participant of.
-     * @principle Enforces access control inherited from the parent chat room.
-     */
-    match /chatRooms/{chatRoomId}/messages/{messageId} {
-      allow read: if isSignedIn() && isChatRoomParticipant(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.participants);
-      allow create: if isSignedIn() && isChatRoomParticipant(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.participants) && request.resource.data.from == request.auth.uid;
-      allow update, delete: if false; // Disallow edits/deletes for now
-    }
-
-    /**
-     * @description Secure requests to join teams or connect with users.
-     * @path /requests/{requestId}
-     * @allow (create) - A user can create a request if the `fromUid` matches their own UID.
-     * @allow (read) - A user can read requests sent to them (`toUid`).
-     * @allow (update) - A user can update the status of a request sent to them.
-     * @deny (list) - Listing all requests is disallowed for privacy.
-     */
-    match /requests/{requestId} {
-      allow get: if isSignedIn() && resource.data.toUid == request.auth.uid;
-      allow list: if false;
-
-      allow create: if isSignedIn() && request.resource.data.fromUid == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.toUid == request.auth.uid;
-      allow delete: if isSignedIn() && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
-    }
-    
-    /**
-     * @description Secure project Kanban boards.
-     * @path /projects/{projectId}
-     */
-    match /projects/{projectId} {
-      allow read, write: if isSignedIn() && isTeamMember(get(/databases/$(database)/documents/projects/$(projectId)).data.teamId);
-    }
-
-    /**
-     * @description Secure project tasks.
-     * @path /projects/{projectId}/tasks/{taskId}
-     */
-    match /projects/{projectId}/tasks/{taskId} {
-      allow read, write: if isSignedIn() && isTeamMember(get(/databases/$(database)/documents/projects/$(projectId)).data.teamId);
-    }
-
-
-    // --- Helper Functions ---
-
-    /**
-     * @description Checks if the user is signed in.
-     * @return {boolean} True if the user is signed in, false otherwise.
-     */
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    /**
-     * @description Checks if the user ID matches the authenticated user's ID.
-     * @param {string} userId - The user ID to compare.
-     * @return {boolean} True if the user ID matches the authenticated user's ID, false otherwise.
-     */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /**
-     * @description Checks if the user is creating their own document (path-based ID matching).
-     *  Used for initial profile creation at `/users/{userId}`.
-     * @param {string} userId - The user ID from the path.
-     * @return {boolean} True if the request is creating a document with a matching ID, false otherwise.
-     */
-    function isSelfCreate(userId) {
-        return request.resource.data.id == userId;
-    }
-
-    /**
-     * @description Combines ownership and existence checks for update/delete operations.
-     *  Verifies that the document exists and is owned by the requesting user.
-     * @param {string} userId - The user ID to check for ownership.
-     * @return {boolean} True if the document exists and is owned by the user, false otherwise.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * @description Checks that the owner ID field is immutable during updates.
-     *  Prevents unauthorized transfer of ownership.
-     * @return {boolean} True if the owner ID is unchanged, false otherwise.
-     */
-    function isImmutableOwner() {
-        return request.resource.data.id == resource.data.id;
-    }
-
-    /**
-     * @description Checks if the authenticated user is a participant of the chat room.
-     * @param {map} participants - Map of user profile ids who are part of the chat room.
-     * @return {boolean} True if the user is a participant, false otherwise.
-     */
-    function isChatRoomParticipant(participants) {
-        return isSignedIn() && request.auth.uid in participants;
-    }
-
-    /**
-     * @description Checks if the authenticated user is a member of a given team.
-     * @param {string} teamId - The ID of the team to check.
-     * @return {boolean} True if the user is a member of the team, false otherwise.
-     */
-    function isTeamMember(teamId) {
-      return isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.members;
+    // chat rooms: participants only
+    match /chatRooms/{roomId} {
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.participants;
+      match /messages/{msgId} {
+        allow create: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(roomId)).data.participants;
+      }
     }
   }
 }
-
-    
