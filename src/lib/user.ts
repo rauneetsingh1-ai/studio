@@ -26,6 +26,7 @@ export function createUserDoc(
   const userRef = doc(firestore, 'users', user.uid);
 
   const userData = {
+    id: user.uid, // Add the user's UID to the document
     name: user.displayName || '',
     email: user.email,
     photoURL: user.photoURL || '',
