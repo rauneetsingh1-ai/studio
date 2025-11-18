@@ -1,0 +1,259 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user's profile information.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        },
+        "college": {
+          "type": "string",
+          "description": "The user's college or university."
+        },
+        "year": {
+            "type": "string",
+            "description": "The user's year of study."
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["Frontend", "Backend", "Full Stack", "Designer", "Product Manager", "Data Scientist", "Mobile Developer"]
+          },
+          "description": "The roles the user is interested in."
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "level": { "type": "string", "enum": ["Beginner", "Intermediate", "Expert"] },
+              "years": { "type": "number" }
+            },
+            "required": ["name", "level"]
+          },
+          "description": "The user's skills with levels and years of experience."
+        },
+        "availability": {
+            "type": "object",
+            "properties": {
+                "days": { "type": "array", "items": { "type": "string" } },
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "tz": { "type": "string" }
+            },
+            "description": "The user's availability for collaboration."
+        },
+        "quiz": {
+            "type": "object",
+            "properties": {
+                "domainScores": { "type": "object" },
+                "overall": { "type": "string" }
+            },
+            "description": "Results from the user's skill quiz."
+        },
+        "location": {
+            "type": "object",
+            "properties": {
+                "lat": { "type": "number" },
+                "lng": { "type": "number" },
+                "city": { "type": "string" }
+            },
+            "description": "The user's geographical location."
+        },
+        "badges": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string" },
+                    "date": { "type": "string", "format": "date-time" }
+                }
+            },
+            "description": "Badges or achievements earned by the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the user account was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last profile update."
+        }
+      },
+      "required": ["name", "email", "createdAt", "updatedAt"]
+    },
+    "Team": {
+        "title": "Team",
+        "description": "Represents a team of users.",
+        "type": "object",
+        "properties": {
+            "name": { "type": "string" },
+            "createdBy": { "type": "string" },
+            "members": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "uid": { "type": "string" },
+                        "role": { "type": "string" }
+                    }
+                }
+            },
+            "status": { "type": "string", "enum": ["open", "closed"] },
+            "techStack": { "type": "array", "items": { "type": "string" } },
+            "projectIdea": {
+                "type": "object",
+                "properties": {
+                    "title": { "type": "string" },
+                    "summary": { "type": "string" }
+                }
+            }
+        },
+        "required": ["name", "createdBy", "members", "status"]
+    },
+    "Request": {
+        "title": "Request",
+        "description": "Represents a request to join a team or connect with a user.",
+        "type": "object",
+        "properties": {
+            "fromUid": { "type": "string" },
+            "toTeamId": { "type": "string" },
+            "toUid": { "type": "string" },
+            "roleRequested": { "type": "string" },
+            "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+            "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["fromUid", "status", "createdAt"]
+    },
+    "ChatRoom": {
+        "title": "ChatRoom",
+        "description": "Represents a chat room for a team or a direct message.",
+        "type": "object",
+        "properties": {
+            "type": { "type": "string", "enum": ["team", "dm"] },
+            "participants": { "type": "array", "items": { "type": "string" } },
+            "lastUpdated": { "type": "string", "format": "date-time" }
+        },
+        "required": ["type", "participants", "lastUpdated"]
+    },
+    "Message": {
+        "title": "Message",
+        "description": "Represents a single message within a chat room.",
+        "type": "object",
+        "properties": {
+            "from": { "type": "string" },
+            "text": { "type": "string" },
+            "createdAt": { "type": "string", "format": "date-time" },
+            "attachments": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["from", "text", "createdAt"]
+    },
+    "Project": {
+        "title": "Project",
+        "description": "Represents a Kanban board for a team project.",
+        "type": "object",
+        "properties": {
+            "teamId": { "type": "string" },
+            "columns": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": { "type": "string" },
+                        "title": { "type": "string" },
+                        "order": { "type": "number" }
+                    }
+                }
+            }
+        },
+        "required": ["teamId", "columns"]
+    },
+    "Task": {
+        "title": "Task",
+        "description": "Represents a single task on a Kanban board.",
+        "type": "object",
+        "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "assignedTo": { "type": "string" },
+            "status": { "type": "string" },
+            "dueDate": { "type": "string", "format": "date-time" }
+        },
+        "required": ["title", "status"]
+    },
+    "MatchesCache": {
+        "title": "MatchesCache",
+        "description": "Caches AI-generated matches for a user.",
+        "type": "object",
+        "properties": {
+            "timestamp": { "type": "string", "format": "date-time" },
+            "matches": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "userId": { "type": "string" },
+                        "compatibilityScore": { "type": "number" },
+                        "reasons": { "type": "array", "items": { "type": "string" } }
+                    }
+                }
+            }
+        },
+        "required": ["timestamp", "matches"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores individual user profiles."
+    },
+    "/teams/{teamId}": {
+        "schema": { "$ref": "#/entities/Team" },
+        "description": "Stores team information."
+    },
+    "/requests/{requestId}": {
+        "schema": { "$ref": "#/entities/Request" },
+        "description": "Stores join requests between users and teams."
+    },
+    "/chatRooms/{roomId}": {
+        "schema": { "$ref": "#/entities/ChatRoom" },
+        "description": "Metadata for chat rooms."
+    },
+    "/chatRooms/{roomId}/messages/{messageId}": {
+        "schema": { "$ref": "#/entities/Message" },
+        "description": "Subcollection for messages within a chat room."
+    },
+    "/projects/{projectId}": {
+        "schema": { "$ref": "#/entities/Project" },
+        "description": "Stores Kanban board data for team projects."
+    },
+    "/projects/{projectId}/tasks/{taskId}": {
+        "schema": { "$ref": "#/entities/Task" },
+        "description": "Subcollection for tasks within a project."
+    },
+    "/matchesCache/{userId}": {
+        "schema": { "$ref": "#/entities/MatchesCache" },
+        "description": "Caches AI-generated matches for users."
+    }
+  }
+}
