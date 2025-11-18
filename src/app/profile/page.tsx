@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { useFirebase, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkillsQuiz } from '@/components/profile/skills-quiz';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -301,7 +302,10 @@ export default function ProfilePage() {
                     {isLoading ? (
                         <ProfileSkeleton />
                     ) : userProfile ? (
-                        <ProfileForm userProfile={userProfile} userDocRef={userDocRef} />
+                        <>
+                            <ProfileForm userProfile={userProfile} userDocRef={userDocRef} />
+                            <SkillsQuiz userProfile={userProfile} userDocRef={userDocRef} />
+                        </>
                     ) : (
                         <Card>
                             <CardContent className="p-6">
@@ -314,5 +318,3 @@ export default function ProfilePage() {
         </AppLayout>
     );
 }
-
-    
