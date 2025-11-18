@@ -8,7 +8,7 @@
  *  Chat rooms are stored in a top-level `/chatRooms/{chatRoomId}` collection, with messages nested under each chat room.
  * @key_security_decisions User listing is disabled to protect user privacy. Read/write access to chat rooms and messages is restricted to members only.
  *  The default security posture for any ambiguous relationship is strict denial.
- * @denormalization The `ChatRoom` document contains a denormalized `members` map (userId: true) to simplify authorization and avoid costly `get()` calls.
+ * @denormalization The `ChatRoom` document contains a denormalized `participants` map (userId: true) to simplify authorization and avoid costly `get()` calls.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -51,39 +51,36 @@ service cloud.firestore {
     }
 
     /**
-     * @description Secure chat rooms with shared access based on the `members` map.
+     * @description Secure chat rooms with shared access based on the `participants` map.
      * @path /chatRooms/{chatRoomId}
-     * @allow (get, list) - Any authenticated user can read or list chat rooms they are a member of (if `request.auth.uid` is in the `members` map).
+     * @allow (get, list) - Any authenticated user can read or list chat rooms they are a participant of (if `request.auth.uid` is in the `participants` map).
      * @allow (create) - Any authenticated user can create a chat room.
-     * @allow (update, delete) - Only members listed in the `members` map can update or delete the chat room.
-     * @deny (get, list) - User 'abc' cannot read or list chat rooms they are not a member of (if 'abc' is not in the `members` map).
+     * @allow (update, delete) - Only participants listed in the `participants` map can update or delete the chat room.
+     * @deny (get, list) - User 'abc' cannot read or list chat rooms they are not a participant of (if 'abc' is not in the `participants` map).
      * @principle Enforces shared access control based on explicit membership.
      */
     match /chatRooms/{chatRoomId} {
-      allow get: if isSignedIn() && isChatRoomMember(resource.data.userProfileIds);
-      allow list: if isSignedIn() && isChatRoomMember(resource.data.userProfileIds);
+      allow get: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
+      allow list: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
 
       allow create: if isSignedIn();
-      allow update: if isSignedIn() && isChatRoomMember(resource.data.userProfileIds);
-      allow delete: if isSignedIn() && isChatRoomMember(resource.data.userProfileIds);
+      allow update: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
+      allow delete: if isSignedIn() && isChatRoomParticipant(resource.data.participants);
     }
 
     /**
      * @description Secure chat messages with access inherited from the parent chat room.
      * @path /chatRooms/{chatRoomId}/messages/{messageId}
-     * @allow (get, list) - Only members of the chat room can read or list messages.
-     * @allow (create) - Only members of the chat room can create messages.
-     * @allow (update, delete) - Only members of the chat room can update or delete messages (typically only the author).
-     * @deny (get, list) - User 'abc' cannot read or list messages in a chat room they are not a member of.
+     * @allow (get, list) - Only participants of the chat room can read or list messages.
+     * @allow (create) - Only participants of the chat room can create messages.
+     * @allow (update, delete) - Only participants of the chat room can update or delete messages (typically only the author).
+     * @deny (get, list) - User 'abc' cannot read or list messages in a chat room they are not a participant of.
      * @principle Enforces access control inherited from the parent chat room.
      */
     match /chatRooms/{chatRoomId}/messages/{messageId} {
-      allow get: if isSignedIn() && isChatRoomMember(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.userProfileIds);
-      allow list: if isSignedIn() && isChatRoomMember(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.userProfileIds);
-
-      allow create: if isSignedIn() && isChatRoomMember(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.userProfileIds) && request.resource.data.userProfileId == request.auth.uid;
-      allow update: if isSignedIn() && isChatRoomMember(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.userProfileIds) && request.resource.data.userProfileId == request.auth.uid;
-      allow delete: if isSignedIn() && isChatRoomMember(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.userProfileIds) && request.resource.data.userProfileId == request.auth.uid;
+      allow read: if isSignedIn() && isChatRoomParticipant(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.participants);
+      allow create: if isSignedIn() && isChatRoomParticipant(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.participants) && request.resource.data.from == request.auth.uid;
+      allow update, delete: if false; // Disallow edits/deletes for now
     }
 
     /**
@@ -152,12 +149,12 @@ service cloud.firestore {
     }
 
     /**
-     * @description Checks if the authenticated user is a member of the chat room.
-     * @param {array} userProfileIds - Array of user profile ids who are part of the chat room.
-     * @return {boolean} True if the user is a member, false otherwise.
+     * @description Checks if the authenticated user is a participant of the chat room.
+     * @param {array} participants - Array of user profile ids who are part of the chat room.
+     * @return {boolean} True if the user is a participant, false otherwise.
      */
-    function isChatRoomMember(userProfileIds) {
-        return isSignedIn() && userProfileIds.hasAny([request.auth.uid]);
+    function isChatRoomParticipant(participants) {
+        return isSignedIn() && request.auth.uid in participants;
     }
   }
 }

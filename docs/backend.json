@@ -1,14 +1,13 @@
 {
   "entities": {
     "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "UserProfile",
+      "title": "User Profile",
       "type": "object",
-      "description": "Represents a user's profile on the TeamUp Forge platform.",
+      "description": "Represents a user's profile on the CollabX platform.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the UserProfile entity."
+          "description": "Unique identifier for the UserProfile entity (matches Firebase Auth UID)."
         },
         "name": {
           "type": "string",
@@ -24,9 +23,17 @@
           "description": "URL of the user's profile photo.",
           "format": "uri"
         },
+        "college": {
+          "type": "string",
+          "description": "User's college or university."
+        },
+        "year": {
+          "type": "string",
+          "description": "User's academic year."
+        },
         "roles": {
           "type": "array",
-          "description": "List of roles assigned to the user.",
+          "description": "List of roles the user is interested in (e.g., 'Frontend', 'Backend').",
           "items": {
             "type": "string"
           }
@@ -35,19 +42,83 @@
           "type": "array",
           "description": "List of skills possessed by the user.",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "level": {
+                "type": "string",
+                "enum": ["Beginner", "Intermediate", "Expert"]
+              },
+              "years": {
+                "type": "number"
+              }
+            }
           }
         },
         "availability": {
-          "type": "string",
-          "description": "User's availability information (e.g., days/times available).",
-          "format": "string"
+          "type": "object",
+          "description": "User's availability information.",
+          "properties": {
+            "days": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "from": {
+              "type": "string"
+            },
+            "to": {
+              "type": "string"
+            },
+            "tz": {
+              "type": "string"
+            }
+          }
+        },
+        "quiz": {
+          "type": "object",
+          "description": "User's quiz scores and overall level.",
+          "properties": {
+            "domainScores": {
+              "type": "object"
+            },
+            "overall": {
+              "type": "string"
+            }
+          }
+        },
+        "location": {
+          "type": "object",
+          "description": "User's geographical location.",
+          "properties": {
+            "lat": {
+              "type": "number"
+            },
+            "lng": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            }
+          }
         },
         "badges": {
           "type": "array",
-          "description": "List of badges earned by the user.",
+          "description": "List of badges or achievements earned by the user.",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
           }
         },
         "createdAt": {
@@ -59,21 +130,6 @@
           "type": "string",
           "description": "Timestamp of when the user profile was last updated.",
           "format": "date-time"
-        },
-        "interests": {
-          "type": "array",
-          "description": "User's interests.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "bio": {
-          "type": "string",
-          "description": "User's biographical information."
-        },
-        "projectPreferences": {
-          "type": "string",
-          "description": "User's project preferences."
         }
       },
       "required": [
@@ -83,117 +139,61 @@
         "createdAt"
       ]
     },
-    "Match": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Match",
+    "Team": {
+      "title": "Team",
       "type": "object",
-      "description": "Represents a match between two users.",
+      "description": "Represents a team of users for a project.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Match entity."
+        "name": {
+          "type": "string"
         },
-        "user1Id": {
+        "createdBy": {
           "type": "string",
-          "description": "Reference to UserProfile 1. (Relationship: UserProfile 1:N Match)"
+          "description": "UID of the user who created the team."
         },
-        "user2Id": {
-          "type": "string",
-          "description": "Reference to UserProfile 2. (Relationship: UserProfile 1:N Match)"
-        },
-        "matchScore": {
-          "type": "number",
-          "description": "The score representing the quality of the match between the two users."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of when the match was calculated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "user1Id",
-        "user2Id",
-        "matchScore",
-        "timestamp"
-      ]
-    },
-    "ChatRoom": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ChatRoom",
-      "type": "object",
-      "description": "Represents a chat room between two or more users.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the ChatRoom entity."
-        },
-        "userProfileIds": {
+        "members": {
           "type": "array",
-          "description": "References to UserProfiles in the chat room. (Relationship: UserProfile N:N ChatRoom)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "closed"]
+        },
+        "techStack": {
+          "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp of when the chat room was created.",
-          "format": "date-time"
+        "projectIdea": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            }
+          }
         }
       },
-      "required": [
-        "id",
-        "userProfileIds",
-        "createdAt"
-      ]
-    },
-    "ChatMessage": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ChatMessage",
-      "type": "object",
-      "description": "Represents a single message within a chat room.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the ChatMessage entity."
-        },
-        "chatRoomId": {
-          "type": "string",
-          "description": "Reference to ChatRoom. (Relationship: ChatRoom 1:N ChatMessage)"
-        },
-        "userProfileId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N ChatMessage)"
-        },
-        "text": {
-          "type": "string",
-          "description": "The content of the message."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of when the message was sent.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "chatRoomId",
-        "userProfileId",
-        "text",
-        "timestamp"
-      ]
+      "required": ["name", "createdBy", "members"]
     },
     "Request": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Request",
       "type": "object",
       "description": "Represents a request from a user to join a team or connect with another user.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Request entity."
-        },
         "fromUid": {
           "type": "string",
           "description": "The UID of the user sending the request."
@@ -208,7 +208,7 @@
         },
         "roleRequested": {
           "type": "string",
-          "description": "The role the user is requesting to have in the team."
+          "description": "The role the user is requesting to have."
         },
         "status": {
           "type": "string",
@@ -226,106 +226,147 @@
         "status",
         "createdAt"
       ]
+    },
+    "ChatRoom": {
+      "title": "ChatRoom",
+      "type": "object",
+      "description": "Represents a chat room for direct messages or teams.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["team", "dm"]
+        },
+        "participants": {
+          "type": "object",
+          "description": "Map of participant UIDs to true for easy rule checking.",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["type", "participants", "lastUpdated"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a single message within a chat room.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "UID of the user who sent the message."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the message was sent.",
+          "format": "date-time"
+        },
+        "attachments": {
+          "type": "array",
+          "description": "Array of storage paths for any attachments.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["from", "text", "createdAt"]
+    },
+    "KanbanTask": {
+      "title": "Kanban Task",
+      "type": "object",
+      "description": "A single task within a project's Kanban board.",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "assignedTo": { "type": "string", "description": "UID of the assigned user." },
+        "status": { "type": "string", "description": "The column ID the task is in." },
+        "dueDate": { "type": "string", "format": "date-time"}
+      },
+      "required": ["title", "status"]
     }
-  },
-  "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
   },
   "firestore": {
     "structure": [
       {
         "path": "/users/{userId}",
         "definition": {
-          "entityName": "UserProfile",
           "schema": {
-            "$ref": "#/backend/entities/UserProfile"
+            "$ref": "#/entities/UserProfile"
           },
-          "description": "Stores user profile data. Path-based ownership, enabling simple security rules based on `request.auth.uid == userId`.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "description": "Stores public and private user profile data. Document ID must match the authenticated user's UID."
         }
       },
       {
-        "path": "/users/{userId}/matches/{matchId}",
+        "path": "/teams/{teamId}",
         "definition": {
-          "entityName": "Match",
           "schema": {
-            "$ref": "#/backend/entities/Match"
+            "$ref": "#/entities/Team"
           },
-          "description": "Stores match data for each user. Matches are owned by the parent user.  Path-based ownership, enabling simple security rules based on `request.auth.uid == userId`.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "matchId",
-              "description": "The unique identifier of the match."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/chatRooms/{chatRoomId}",
-        "definition": {
-          "entityName": "ChatRoom",
-          "schema": {
-            "$ref": "#/backend/entities/ChatRoom"
-          },
-          "description": "Stores chat room data. Includes denormalized `members` map (userId: true) for authorization independence.  Allows listing of chat rooms a user is a member of.",
-          "params": [
-            {
-              "name": "chatRoomId",
-              "description": "The unique identifier of the chat room."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/chatRooms/{chatRoomId}/messages/{messageId}",
-        "definition": {
-          "entityName": "ChatMessage",
-          "schema": {
-            "$ref": "#/backend/entities/ChatMessage"
-          },
-          "description": "Stores chat messages within a chat room.  Authorization is inherited from the parent chatRoom document. Assumes only members of the chatRoom can read/write messages.",
-          "params": [
-            {
-              "name": "chatRoomId",
-              "description": "The unique identifier of the chat room."
-            },
-            {
-              "name": "messageId",
-              "description": "The unique identifier of the message."
-            }
-          ]
+          "description": "Stores information about a specific team."
         }
       },
       {
         "path": "/requests/{requestId}",
         "definition": {
-          "entityName": "Request",
           "schema": {
-            "$ref": "#/backend/entities/Request"
+            "$ref": "#/entities/Request"
           },
-          "description": "Stores requests from users to join teams or connect with other users.",
-          "params": [
-            {
-              "name": "requestId",
-              "description": "The unique identifier for the request."
+          "description": "Stores requests from users to join teams or connect with other users."
+        }
+      },
+      {
+        "path": "/chatRooms/{roomId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/ChatRoom"
+          },
+          "description": "Stores metadata for a chat room. Access is controlled by the 'participants' map."
+        }
+      },
+      {
+        "path": "/chatRooms/{roomId}/messages/{messageId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/ChatMessage"
+          },
+          "description": "Stores all messages for a specific chat room. Inherits access rules from the parent chat room."
+        }
+      },
+      {
+        "path": "/projects/{projectId}",
+        "definition": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "teamId": { "type": "string" },
+              "columns": { "type": "array", "items": {"type": "object", "properties": {"id":{"type": "string"}, "title": {"type": "string"}, "order": {"type": "number"}}}}
             }
-          ]
+          },
+          "description": "Represents a Kanban board for a team project."
+        }
+      },
+       {
+        "path": "/projects/{projectId}/tasks/{taskId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/KanbanTask"
+          },
+          "description": "Stores individual tasks for a project's Kanban board."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and support secure list operations (QAPs). User profiles are stored under `/users/{userId}` for private data with path-based ownership. Matches are stored under `/users/{userId}/matches/{matchId}` since a user has many matches, inheriting the ownership from the user. This eliminates the need for `get()` calls in security rules. ChatRooms between users are placed in a top-level `/chatRooms/{chatRoomId}` collection, with denormalized `members` map to grant access to users, this enforces authorization independence and avoids complex rule logic. ChatMessages are nested under `/chatRooms/{chatRoomId}/messages/{messageId}`, inheriting authorization from the parent ChatRoom. The top-level `requests` collection manages connection/join requests, with rules ensuring users can only create requests from their own ID and read requests sent to them."
+    ]
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   }
 }
-    
