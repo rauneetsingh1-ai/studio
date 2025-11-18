@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'TeamUp Forge',
+  title: 'CODECELEST',
   description: 'Find your perfect buildathon teammates with AI-powered matching.',
 };
 
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" style={{colorScheme: 'dark'}} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

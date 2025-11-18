@@ -20,7 +20,7 @@ export default function LandingPage() {
           <Button variant="ghost" asChild>
             <Link href="/login">Login</Link>
           </Button>
-          <Button asChild>
+          <Button variant="secondary" asChild>
             <Link href="/signup">Get Started</Link>
           </Button>
         </nav>
@@ -35,7 +35,7 @@ export default function LandingPage() {
                     Forge Your Dream Team for the Next Buildathon
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    TeamUp Forge uses AI to connect you with the perfect
+                    CODECELEST uses AI to connect you with the perfect
                     teammates based on skills, interests, and project goals.
                     Stop searching, start building.
                   </p>
@@ -72,8 +72,8 @@ export default function LandingPage() {
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-2 pt-12">
               <div className="grid gap-1">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-md">
-                        <BrainCircuit className="w-6 h-6 text-primary" />
+                    <div className="p-2 bg-accent/10 rounded-md">
+                        <BrainCircuit className="w-6 h-6 text-accent" />
                     </div>
                     <h3 className="text-lg font-bold">AI-Powered Matching</h3>
                 </div>
@@ -83,8 +83,8 @@ export default function LandingPage() {
               </div>
               <div className="grid gap-1">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-md">
-                        <UsersRound className="w-6 h-6 text-primary" />
+                    <div className="p-2 bg-accent/10 rounded-md">
+                        <UsersRound className="w-6 h-6 text-accent" />
                     </div>
                     <h3 className="text-lg font-bold">Detailed User Profiles</h3>
                 </div>
@@ -94,8 +94,8 @@ export default function LandingPage() {
               </div>
               <div className="grid gap-1">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-md">
-                        <MessagesSquare className="w-6 h-6 text-primary" />
+                    <div className="p-2 bg-accent/10 rounded-md">
+                        <MessagesSquare className="w-6 h-6 text-accent" />
                     </div>
                     <h3 className="text-lg font-bold">Real-time Chat Rooms</h3>
                 </div>
@@ -105,8 +105,8 @@ export default function LandingPage() {
               </div>
               <div className="grid gap-1">
                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-md">
-                        <UsersRound className="w-6 h-6 text-primary" />
+                    <div className="p-2 bg-accent/10 rounded-md">
+                        <UsersRound className="w-6 h-6 text-accent" />
                     </div>
                     <h3 className="text-lg font-bold">Team Collaboration Tools</h3>
                 </div>
@@ -124,7 +124,7 @@ export default function LandingPage() {
                 Ready to Build Something Amazing?
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Join TeamUp Forge today and find the collaborators who will help
+                Join CODECELEST today and find the collaborators who will help
                 you bring your vision to life.
               </p>
             </div>
@@ -138,7 +138,7 @@ export default function LandingPage() {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">
-          &copy; 2024 TeamUp Forge. All rights reserved.
+          &copy; 2024 CODECELEST. All rights reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link
