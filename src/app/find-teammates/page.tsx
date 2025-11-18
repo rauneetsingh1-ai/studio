@@ -1,10 +1,18 @@
+'use client';
+
 import { AppLayout } from '@/components/layout/app-layout';
 import { Input } from '@/components/ui/input';
 import TeammateCard from '@/components/teammates/teammate-card';
-import { teammates, currentUser } from '@/lib/data';
+import { teammates } from '@/lib/data';
 import { Search } from 'lucide-react';
+import { useFirebase } from '@/firebase';
 
 export default function FindTeammatesPage() {
+  const { user } = useFirebase();
+
+  // Filter out the current user from the list of teammates
+  const potentialTeammates = teammates.filter(t => t.id !== user?.uid);
+
   return (
     <AppLayout>
       <main className="flex-1 p-4 md:p-8">
@@ -25,8 +33,8 @@ export default function FindTeammatesPage() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {teammates.map((user) => (
-            <TeammateCard key={user.id} user={user} currentUser={currentUser} />
+          {potentialTeammates.map((user) => (
+            <TeammateCard key={user.id} user={user} />
           ))}
         </div>
       </main>

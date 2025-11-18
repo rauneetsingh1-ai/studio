@@ -183,6 +183,49 @@
         "text",
         "timestamp"
       ]
+    },
+    "Request": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Request",
+      "type": "object",
+      "description": "Represents a request from a user to join a team or connect with another user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Request entity."
+        },
+        "fromUid": {
+          "type": "string",
+          "description": "The UID of the user sending the request."
+        },
+        "toUid": {
+          "type": "string",
+          "description": "The UID of the user receiving the request."
+        },
+        "toTeamId": {
+          "type": "string",
+          "description": "The ID of the team receiving the request."
+        },
+        "roleRequested": {
+          "type": "string",
+          "description": "The role the user is requesting to have in the team."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the request.",
+          "enum": ["pending", "accepted", "rejected"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the request was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "fromUid",
+        "status",
+        "createdAt"
+      ]
     }
   },
   "auth": {
@@ -264,9 +307,25 @@
             }
           ]
         }
+      },
+      {
+        "path": "/requests/{requestId}",
+        "definition": {
+          "entityName": "Request",
+          "schema": {
+            "$ref": "#/backend/entities/Request"
+          },
+          "description": "Stores requests from users to join teams or connect with other users.",
+          "params": [
+            {
+              "name": "requestId",
+              "description": "The unique identifier for the request."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and support secure list operations (QAPs). User profiles are stored under `/users/{userId}` for private data with path-based ownership. Matches are stored under `/users/{userId}/matches/{matchId}` since a user has many matches, inheriting the ownership from the user. This eliminates the need for `get()` calls in security rules. ChatRooms between users are placed in a top-level `/chatRooms/{chatRoomId}` collection, with denormalized `members` map to grant access to users, this enforces authorization independence and avoids complex rule logic. ChatMessages are nested under `/chatRooms/{chatRoomId}/messages/{messageId}`, inheriting authorization from the parent ChatRoom. This design prioritizes clarity, scalability, and robust security."
+    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and support secure list operations (QAPs). User profiles are stored under `/users/{userId}` for private data with path-based ownership. Matches are stored under `/users/{userId}/matches/{matchId}` since a user has many matches, inheriting the ownership from the user. This eliminates the need for `get()` calls in security rules. ChatRooms between users are placed in a top-level `/chatRooms/{chatRoomId}` collection, with denormalized `members` map to grant access to users, this enforces authorization independence and avoids complex rule logic. ChatMessages are nested under `/chatRooms/{chatRoomId}/messages/{messageId}`, inheriting authorization from the parent ChatRoom. The top-level `requests` collection manages connection/join requests, with rules ensuring users can only create requests from their own ID and read requests sent to them."
   }
 }
     

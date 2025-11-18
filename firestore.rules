@@ -86,6 +86,23 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isChatRoomMember(get(/databases/$(database)/documents/chatRooms/$(chatRoomId)).data.userProfileIds) && request.resource.data.userProfileId == request.auth.uid;
     }
 
+    /**
+     * @description Secure requests to join teams or connect with users.
+     * @path /requests/{requestId}
+     * @allow (create) - A user can create a request if the `fromUid` matches their own UID.
+     * @allow (read) - A user can read requests sent to them (`toUid`).
+     * @allow (update) - A user can update the status of a request sent to them.
+     * @deny (list) - Listing all requests is disallowed for privacy.
+     */
+    match /requests/{requestId} {
+      allow get: if isSignedIn() && resource.data.toUid == request.auth.uid;
+      allow list: if false;
+
+      allow create: if isSignedIn() && request.resource.data.fromUid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.toUid == request.auth.uid;
+      allow delete: if isSignedIn() && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+    }
+
     // --- Helper Functions ---
 
     /**
