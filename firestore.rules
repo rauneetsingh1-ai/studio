@@ -150,7 +150,7 @@ service cloud.firestore {
 
     /**
      * @description Checks if the authenticated user is a participant of the chat room.
-     * @param {array} participants - Array of user profile ids who are part of the chat room.
+     * @param {map} participants - Map of user profile ids who are part of the chat room.
      * @return {boolean} True if the user is a participant, false otherwise.
      */
     function isChatRoomParticipant(participants) {
@@ -158,3 +158,4 @@ service cloud.firestore {
     }
   }
 }
+    

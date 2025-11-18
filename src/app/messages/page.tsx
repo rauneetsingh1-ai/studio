@@ -1,7 +1,7 @@
 'use client';
 
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
+import { collection, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -84,7 +84,7 @@ function ChatView({ activeChatId }) {
     const [newMessage, setNewMessage] = useState('');
 
     const messagesQuery = useMemoFirebase(() => {
-        if (!activeChatId) return null;
+        if (!activeChatId || !firestore) return null;
         return query(
             collection(firestore, `chatRooms/${activeChatId}/messages`),
             orderBy('createdAt', 'asc')
@@ -95,10 +95,10 @@ function ChatView({ activeChatId }) {
 
     const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !user || !activeChatId) return;
+        if (!newMessage.trim() || !user || !activeChatId || !firestore) return;
 
         const messagesCollection = collection(firestore, `chatRooms/${activeChatId}/messages`);
-        addDoc(messagesCollection, {
+        addDocumentNonBlocking(messagesCollection, {
             from: user.uid,
             text: newMessage.trim(),
             createdAt: serverTimestamp()
@@ -155,10 +155,10 @@ export default function MessagesPage() {
   const [activeChatId, setActiveChatId] = useState(null);
 
   const chatRoomsQuery = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return query(
       collection(firestore, 'chatRooms'),
-      where('participants', 'array-contains', user.uid)
+      where(`participants.${user.uid}`, '==', true)
     );
   }, [firestore, user]);
 
@@ -214,3 +214,4 @@ export default function MessagesPage() {
     </AppLayout>
   );
 }
+    
