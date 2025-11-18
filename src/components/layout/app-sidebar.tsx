@@ -26,13 +26,15 @@ import {
   LogOut,
   Swords,
   LayoutDashboard,
+  Bell,
 } from 'lucide-react';
 import Logo from '../logo';
-import { currentUser } from '@/lib/data';
+import { useFirebase } from '@/firebase';
 
 const menuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/find-teammates', label: 'Find Teammates', icon: UsersRound },
+  { href: '/notifications', label: 'Notifications', icon: Bell },
   { href: '/messages', label: 'Messages', icon: MessageSquare, badge: '3' },
   { href: '/team', label: 'My Team', icon: Swords },
 ];
@@ -45,6 +47,7 @@ const bottomMenuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useFirebase();
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -93,11 +96,11 @@ export function AppSidebar() {
         </SidebarMenu>
         <div className="flex items-center gap-2 p-2">
             <Avatar className='size-8'>
-                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint="person face" />
-                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={user?.photoURL ?? undefined} alt={user?.displayName ?? ''} data-ai-hint="person face" />
+                <AvatarFallback>{user?.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                <span className="text-sm font-semibold">{currentUser.name}</span>
+                <span className="text-sm font-semibold">{user?.displayName}</span>
                 <span className="text-xs text-muted-foreground">Pro Member</span>
             </div>
         </div>
