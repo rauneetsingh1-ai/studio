@@ -10,7 +10,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'TeamUp Forge',
+  title: 'CollabX',
   description: 'Find your perfect buildathon teammates with AI-powered matching.',
 };
 
@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className={cn('min-h-screen bg-background font-body antialiased', inter.variable)}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
