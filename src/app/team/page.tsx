@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 
 const taskSchema = z.object({
@@ -162,7 +163,7 @@ export default function TeamPage() {
         // A more robust solution might involve storing the user's team ID on their user profile.
         return query(
             collection(firestore, 'teams'),
-            where('members', 'array-contains', { uid: user.uid, role: 'member' }) 
+            where('members', 'array-contains', { uid: user.uid, role: 'owner' }) 
         );
     }, [user, firestore]);
     const { data: teams, isLoading: isLoadingTeams } = useCollection(teamQuery);
@@ -230,7 +231,9 @@ export default function TeamPage() {
                         <p className="mt-1 text-sm text-muted-foreground">
                             Create a team and a project to start collaborating.
                         </p>
-                        <Button className="mt-4">Create Your Team</Button>
+                        <Button className="mt-4" asChild>
+                           <Link href="/team/create">Create Your Team</Link>
+                        </Button>
                     </CardContent>
                 </Card>
             </main>

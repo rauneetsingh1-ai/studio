@@ -131,8 +131,8 @@ export default function DashboardPage() {
                   Ready to start building? Create a team and begin collaborating
                   on your project.
                 </p>
-                <Button variant="secondary">
-                  <Swords /> Create a Team
+                <Button variant="secondary" asChild>
+                  <Link href="/team/create"><Swords /> Create a Team</Link>
                 </Button>
               </div>
             </CardContent>
