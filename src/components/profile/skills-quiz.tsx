@@ -8,9 +8,8 @@ import { Label } from '@/components/ui/label';
 import { serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { updateDocumentNonBlocking } from '@/firebase';
-import { BarChart, BrainCircuit, Loader, CheckCircle } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, Bar } from '@/components/ui/chart';
-import { BarChart as RechartsBarChart } from 'recharts';
+import { BrainCircuit, Loader, CheckCircle } from 'lucide-react';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, Bar, BarChart as RechartsBarChart } from '@/components/ui/chart';
 
 
 const quizQuestions = [

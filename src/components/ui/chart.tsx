@@ -355,6 +355,9 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+const BarChart = RechartsPrimitive.BarChart
+const Bar = RechartsPrimitive.Bar
+
 export {
   ChartContainer,
   ChartTooltip,
@@ -362,4 +365,6 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  BarChart,
+  Bar,
 }
