@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';

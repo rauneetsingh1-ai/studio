@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import { cn } from '@/lib/utils';
 
 export default function LogoIcon({ className }: { className?: string }) {

@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 export type UserProfile = {
   id: string;
   name: string;

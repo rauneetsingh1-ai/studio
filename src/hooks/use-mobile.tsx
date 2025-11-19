@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

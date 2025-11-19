@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 "use client"
 
 // Inspired by react-hot-toast library

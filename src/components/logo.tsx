@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import { cn } from '@/lib/utils';
 import LogoIcon from './logo-icon';
 

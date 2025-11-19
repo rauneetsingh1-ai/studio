@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';

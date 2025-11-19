@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 'use client';
 
 import type { UserProfile } from '@/lib/types';

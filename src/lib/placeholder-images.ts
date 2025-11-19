@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import data from './placeholder-images.json';
 
 export type ImagePlaceholder = {

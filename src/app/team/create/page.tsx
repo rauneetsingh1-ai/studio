@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 'use client';
 
 import { useState } from 'react';
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFirebase, addDocumentNonBlocking } from '@/firebase';
-import { collection, writeBatch } from 'firebase/firestore';
+import { collection, writeBatch, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Loader, Swords } from 'lucide-react';
 
@@ -75,7 +76,7 @@ export default function CreateTeamPage() {
         });
 
         // 2. Create the corresponding project document
-        const newProjectRef = doc(projectsCollection);
+        const newProjectRef = doc(projectsCollection, newTeamRef.id);
         batch.set(newProjectRef, {
             teamId: newTeamRef.id,
             columns: [

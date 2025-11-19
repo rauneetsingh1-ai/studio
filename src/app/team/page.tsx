@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -154,13 +155,11 @@ function KanbanBoard({ project, tasks, onMoveTask }) {
 }
 
 export default function TeamPage() {
-    const { user, firestore } = useFirebase();
+    const { user, firestore, isUserLoading } = useFirebase();
 
     // 1. Find the user's team
     const teamQuery = useMemoFirebase(() => {
         if (!user) return null;
-        // This is a simplification and assumes the user is in one team.
-        // A more robust solution might involve storing the user's team ID on their user profile.
         return query(
             collection(firestore, 'teams'),
             where('members', 'array-contains', { uid: user.uid, role: 'owner' }) 
@@ -170,12 +169,12 @@ export default function TeamPage() {
     const team = teams?.[0]; // Assume user is in one team for now
 
     // 2. Find the project for that team
-    const projectQuery = useMemoFirebase(() => {
+    const projectDocRef = useMemoFirebase(() => {
         if (!team) return null;
-        return query(collection(firestore, 'projects'), where('teamId', '==', team.id));
+        return doc(firestore, 'projects', team.id);
     }, [team]);
-    const { data: projects, isLoading: isLoadingProjects } = useCollection(projectQuery);
-    const project = projects?.[0];
+    const { data: project, isLoading: isLoadingProjects } = useDoc(projectDocRef);
+    
 
     // 3. Get tasks for the project
     const tasksQuery = useMemoFirebase(() => {

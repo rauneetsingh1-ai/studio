@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import React from 'react';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from './app-sidebar';

@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';

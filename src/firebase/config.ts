@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 export const firebaseConfig = {
   "projectId": "studio-7595154795-73af4",
   "appId": "1:838110756262:web:d6aa7070b6960497722367",

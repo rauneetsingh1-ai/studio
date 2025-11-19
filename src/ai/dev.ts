@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 import { config } from 'dotenv';
 config();
 

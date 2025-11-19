@@ -1,3 +1,4 @@
+// Author: rauneetsingh1@gmail.com
 'use client';
 import { FirestorePermissionError } from '@/firebase/errors';
 
